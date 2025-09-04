@@ -5,9 +5,9 @@ import {
   MessageCircle,
   Repeat2,
   Heart,
-  Eye,
-  MoreHorizontal,
+  Eye
 } from "lucide-react"
+import DropdownMenu from "./DropdownMenu"
 
 interface FooterActionsProps {
   likes: number
@@ -66,9 +66,13 @@ const FooterActions: React.FC<FooterActionsProps> = ({
         <span className="flex items-center gap-1">
           <Eye size={14} /> {formatNumber(views)}
         </span>
-        <button className="hover:text-black">
-          <MoreHorizontal size={14} />
-        </button>
+        <DropdownMenu
+    options={[
+      { label: "Share", onClick: () => alert("Share clicked") },
+      { label: "Report", onClick: () => alert("Report clicked") },
+      { label: "Copy link", onClick: () => alert("Link copied!") },
+    ]}
+  />
       </div>
     </div>
   )

@@ -27,7 +27,7 @@ const Header = () => {
 
       <div className="flex items-center gap-4 mr-25">
         <button
-            className="min-w-[120px] scale-90 px-4 py-1 text-white rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 transition"
+            className="text-sm min-w-[120px] scale-90 px-4 py-1 text-white rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 transition"
         >
             New Post
         </button>

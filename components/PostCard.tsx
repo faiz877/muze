@@ -32,7 +32,7 @@ const PostCard: React.FC<PostCardProps> = ({
   boostedBy,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 w-[600px]">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 w-full animate-fadeIn mb-4">
       {/* Boosted or reply indicator */}
       {boostedBy && (
         <p className="text-xs text-gray-500 mb-2">

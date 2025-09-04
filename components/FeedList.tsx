@@ -65,18 +65,18 @@ const FeedList: React.FC = () => {
   }
 
   return (
-    <div className="w-[600px] mx-auto -mt-7 bg-[#F6F6F6]">
+    <div className="w-full max-w-[600px] mx-auto -mt-7 bg-[#F6F6F6] px-4 sm:px-0">
       <InfiniteScroll
         dataLength={posts.length}
         next={fetchMorePosts}
         hasMore={hasMore}
         loader={
-  <div className="space-y-4 py-4">
-    {[...Array(3)].map((_, i) => (
-      <PostSkeleton key={i} />
-    ))}
-  </div>
-}
+            <div className="space-y-4 py-4">
+                {[...Array(3)].map((_, i) => (
+                <PostSkeleton key={i} />
+                ))}
+            </div>
+        }
         endMessage={
           <p className="text-center text-sm text-gray-400 py-4">
             🎉 You’ve reached the end!

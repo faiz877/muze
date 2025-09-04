@@ -45,7 +45,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
       {/* Author row */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-gray-300 rounded-full cursor-pointer transform hover:scale-110 hover:ring-2 hover:ring-orange-500/20 transition-all duration-200" />
+        <div className="w-8 h-8 bg-gray-300 rounded-full" />
         <div className="flex items-center gap-2 text-sm">
           <span className="font-semibold text-gray-900">{author}</span>
           <span className="text-gray-500">@{username}</span>

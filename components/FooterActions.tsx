@@ -3,7 +3,6 @@ import {
   ThumbsUp,
   ThumbsDown,
   MessageCircle,
-  Repeat2,
   Heart,
   Eye,
   Zap
@@ -117,7 +116,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
 
       {/* Right side (views + menu) */}
       <div className="flex items-center gap-3 text-xs">
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-gray-100 transition-all duration-200 hover:text-black">
           <Eye size={14} /> {formatNumber(views)}
         </span>
         <DropdownMenu

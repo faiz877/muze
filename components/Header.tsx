@@ -20,7 +20,7 @@ const Header = () => {
           <input
             type="text"
             placeholder="Search or find something on Paper"
-            className="w-full text-black placeholder:text-gray-400 placeholder:font-normal px-4 py-2 rounded-lg"
+            className="text-sm w-full text-black placeholder:text-gray-400 placeholder:font-normal px-4 py-2 rounded-lg"
         />
         </div>
       </div>

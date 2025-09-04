@@ -1,14 +1,6 @@
 import React from "react"
 import Image from "next/image"
-import {
-  ThumbsUp,
-  ThumbsDown,
-  MessageCircle,
-  Heart,
-  Eye,
-  MoreHorizontal,
-  Zap,
-} from "lucide-react"
+import FooterActions from "./FooterActions"
 
 interface PostCardProps {
   author: string
@@ -23,12 +15,6 @@ interface PostCardProps {
   imageUrl?: string
   isReply?: boolean
   boostedBy?: string
-}
-
-const formatNumber = (num: number) => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K"
-  return num.toString()
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -95,48 +81,13 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
 
       {/* Footer / Actions */}
-<div className="flex items-center justify-between mt-3 text-gray-500">
-  <div className="flex items-center gap-3">
-    {/* Likes + Dislikes in one pill */}
-    <div className="flex items-center gap-3 px-3 py-1 rounded-full bg-[#F6F6F6] border border-gray-200 text-xs">
-      <button className="flex items-center gap-1 hover:text-black">
-        <ThumbsUp size={14} /> {formatNumber(likes)}
-      </button>
-      <span className="text-gray-300">|</span>
-      <button className="flex items-center gap-1 hover:text-black">
-        <ThumbsDown size={14} /> {formatNumber(dislikes || 0)}
-      </button>
-    </div>
-
-    {/* Comments */}
-    <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6F6F6] border border-gray-200 text-xs hover:text-black">
-      <MessageCircle size={14} /> {formatNumber(comments)}
-    </button>
-
-    {/* Reposts (Zap) */}
-    <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6F6F6] border border-gray-200 text-xs hover:text-black">
-      <Zap size={14} /> {formatNumber(reposts)}
-    </button>
-
-    {/* Thanks */}
-    <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6F6F6] border border-gray-200 text-xs hover:text-black">
-      <Heart size={14} /> Thanks
-    </button>
-  </div>
-
-  {/* Views + Options */}
-  <div className="flex items-center gap-3 text-xs">
-    <span className="flex items-center gap-1">
-      <Eye size={14} /> {formatNumber(views)}
-    </span>
-    <button className="hover:text-black">
-      <MoreHorizontal size={14} />
-    </button>
-  </div>
-</div>
-
-
-
+      <FooterActions
+        likes={likes}
+        dislikes={dislikes}
+        comments={comments}
+        reposts={reposts}
+        views={views}
+      />
     </div>
   )
 }

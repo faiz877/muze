@@ -14,6 +14,7 @@ export const GET_POSTS = gql`
       views
       timestamp
       imageUrl
+      avatarUrl
       isReply
       parentPostId
     }
@@ -44,6 +45,7 @@ export const NEW_POST_SUBSCRIPTION = gql`
       views
       timestamp
       imageUrl
+      avatarUrl
       isReply
       parentPostId
     }

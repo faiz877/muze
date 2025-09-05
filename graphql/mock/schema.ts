@@ -33,7 +33,8 @@ export const typeDefs = gql`
 `
 
 // Create a repeating list of posts based on 20 base posts
-const MOCK_POSTS: any[] = Array.from({ length: 100 }, (_, i) => {
+// Export MOCK_POSTS so it can be accessed by apollo-client.ts
+export const MOCK_POSTS: any[] = Array.from({ length: 100 }, (_, i) => {
   const base = BASE_POSTS[i % BASE_POSTS.length]
   const AVATAR_MAP: Record<string, string> = {
     elonmusk: '/elon.jpg',

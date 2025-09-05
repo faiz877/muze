@@ -9,7 +9,7 @@ import { makeExecutableSchema } from "@graphql-tools/schema"
 // Use require to avoid TS type resolution issues for this package
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { addMocksToSchema } = require("@graphql-tools/mock")
-import { typeDefs as sdl, resolvers as baseResolvers } from "./mock/schema"
+import { typeDefs as sdl, resolvers as baseResolvers, MOCK_POSTS } from "./mock/schema"
 
 // HTTP link for queries & mutations
 const httpLink = new HttpLink({
@@ -57,33 +57,40 @@ if (useMocks) {
   const mockSubLink = new ApolloLink(() =>
     new Observable((observer) => {
       // Add a delay before the first post to prevent it from appearing immediately
+      let interval: NodeJS.Timeout | null = null
       const timeout = setTimeout(() => {
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
+          // Create a new post with timestamp
+          const newPost = {
+            __typename: 'Post',
+            id: String(Date.now()),
+            author: 'Muze Daily',
+            username: 'muze',
+            content: 'Today we asked: what small habit improved your focus the most? Mine was batching notifications to twice a day. Share yours below.',
+            likes: Math.floor(Math.random() * 50),
+            comments: Math.floor(Math.random() * 10),
+            reposts: Math.floor(Math.random() * 5),
+            views: Math.floor(Math.random() * 1000),
+            timestamp: new Date().toISOString(),
+            imageUrl: null,
+            avatarUrl: '/profile2.jpg',
+            isReply: false,
+            parentPostId: null,
+          }
+          
+          // Add the new post to MOCK_POSTS so it can be found by mutations
+          MOCK_POSTS.unshift(newPost)
+          
           observer.next({
             data: {
-              newPost: {
-                __typename: 'Post',
-                id: String(Date.now()),
-                author: 'Muze Daily',
-                username: 'muze',
-                content: 'Today we asked: what small habit improved your focus the most? Mine was batching notifications to twice a day. Share yours below.',
-                likes: Math.floor(Math.random() * 50),
-                comments: Math.floor(Math.random() * 10),
-                reposts: Math.floor(Math.random() * 5),
-                views: Math.floor(Math.random() * 1000),
-                timestamp: new Date().toISOString(),
-                imageUrl: null,
-                avatarUrl: '/profile2.jpg',
-                isReply: false,
-                parentPostId: null,
-              },
+              newPost,
             },
           })
         }, 15000)
       }, 5000) // 5 second delay before first post
       return () => {
         clearTimeout(timeout)
-        clearInterval(interval)
+        if (interval) clearInterval(interval)
       }
     })
   )

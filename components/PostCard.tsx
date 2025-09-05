@@ -77,7 +77,7 @@ const PostCard: React.FC<PostCardProps> = ({
             layout="responsive"
             width={600}
             height={400}
-            priority
+            loading="lazy"
           />
         </div>
       )}
@@ -95,4 +95,21 @@ const PostCard: React.FC<PostCardProps> = ({
   )
 }
 
-export default PostCard
+const areEqual = (prev: PostCardProps, next: PostCardProps) => {
+  if (prev.id !== next.id) return false
+  if (prev.likes !== next.likes) return false
+  if (prev.dislikes !== next.dislikes) return false
+  if (prev.comments !== next.comments) return false
+  if (prev.reposts !== next.reposts) return false
+  if (prev.views !== next.views) return false
+  if (prev.content !== next.content) return false
+  if (prev.imageUrl !== next.imageUrl) return false
+  if (prev.isReply !== next.isReply) return false
+  if (prev.boostedBy !== next.boostedBy) return false
+  if (prev.author !== next.author) return false
+  if (prev.username !== next.username) return false
+  if (prev.timestamp !== next.timestamp) return false
+  return true
+}
+
+export default React.memo(PostCard, areEqual)

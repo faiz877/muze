@@ -33,7 +33,7 @@ interface PostsVars {
   limit: number
 }
 
-const FeedList: React.FC = () => {
+const FeedList: React.FC<{ initialPosts?: Post[] }> = ({ initialPosts = [] }) => {
   const { data, loading, error, fetchMore } = useQuery<PostsData, PostsVars>(
     GET_POSTS,
     {
@@ -42,12 +42,25 @@ const FeedList: React.FC = () => {
     }
   )
 
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState<Post[]>(initialPosts)
 
-  // Sync Apollo query data into local state
+  // Helper: ensure unique posts by id (preserve order)
+  const uniqueById = (items: Post[]): Post[] => {
+    const seen = new Set<string>()
+    const result: Post[] = []
+    for (const item of items) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id)
+        result.push(item)
+      }
+    }
+    return result
+  }
+
+  // Sync Apollo query data into local state (dedup by id)
   useEffect(() => {
     if (data?.posts) {
-      setPosts(data.posts)
+      setPosts(uniqueById(data.posts))
     }
   }, [data])
 
@@ -58,7 +71,7 @@ const FeedList: React.FC = () => {
 
   useEffect(() => {
     if (subData?.newPost) {
-      setPosts((prev) => [subData.newPost, ...prev]) // prepend new post
+      setPosts((prev) => uniqueById([subData.newPost, ...prev])) // prepend new post, dedup
     }
   }, [subData])
 
@@ -87,7 +100,7 @@ const FeedList: React.FC = () => {
   }
 
   // Loading State (initial load)
-  if (loading && !data) {
+  if (loading && !data && posts.length === 0) {
     return (
       <div className="space-y-4 py-4 w-full max-w-[600px] mx-auto">
         {[...Array(3)].map((_, i) => (
@@ -109,7 +122,7 @@ const FeedList: React.FC = () => {
           return prev
         }
         return {
-          posts: [...prev.posts, ...fetchMoreResult.posts],
+          posts: uniqueById([...(prev.posts || []), ...fetchMoreResult.posts]),
         }
       },
     })

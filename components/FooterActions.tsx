@@ -43,6 +43,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
   const [disliked, setDisliked] = useState(false)
   const [thanked, setThanked] = useState(false)
   const [reposted, setReposted] = useState(false)
+  const [repostsCount, setRepostsCount] = useState(reposts)
   const [likes, setLikes] = useState(initialLikes)
   const [dislikes, setDislikes] = useState(initialDislikes || 0)
 
@@ -77,7 +78,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
 
   const handleDislike = () => {
     if (liked) {
-      setLiked(false)
+      toggleLikeLocal(postId)
       setLikes((prev) => prev - 1)
     }
     const newDisliked = !disliked
@@ -122,10 +123,14 @@ const FooterActions: React.FC<FooterActionsProps> = ({
           className={`flex items-center gap-1 px-3 py-1 rounded-full bg-[#F6F6F6] border border-gray-200 transition-all duration-200 ${
             reposted ? "text-green-500 scale-110" : "hover:text-black hover:scale-105"
           }`}
-          onClick={() => setReposted(!reposted)}
+          onClick={() => {
+            const newReposted = !reposted
+            setReposted(newReposted)
+            setRepostsCount((prev) => (newReposted ? prev + 1 : prev - 1))
+          }}
         >
           <Zap size={14} className={reposted ? "fill-current" : ""} />{" "}
-          {formatNumber(reposts)}
+          {formatNumber(repostsCount)}
         </button>
 
         {/* Thanks */}

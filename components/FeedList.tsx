@@ -1,12 +1,12 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import PostCard from "./PostCard"
 import { AlertCircle, Inbox } from "lucide-react"
 import PostSkeleton from "./PostSkeleton"
-import { GET_POSTS } from "@/graphql/queries"
-import { useQuery } from "@apollo/client/react"
+import { useQuery, useSubscription } from "@apollo/client/react"
+import { GET_POSTS, NEW_POST_SUBSCRIPTION } from "@/graphql/queries"
 
 interface Post {
   id: string
@@ -42,32 +42,25 @@ const FeedList: React.FC = () => {
     }
   )
 
-  const posts = data?.posts || []
+  const [posts, setPosts] = useState<Post[]>([])
 
-  const fetchMorePosts = () => {
-    if (!posts) return
+  // Sync Apollo query data into local state
+  useEffect(() => {
+    if (data?.posts) {
+      setPosts(data.posts)
+    }
+  }, [data])
 
-    fetchMore({
-      variables: {
-        page: Math.floor(posts.length / 10) + 1,
-        limit: 10,
-      },
-      updateQuery: (
-        prev: PostsData,
-        { fetchMoreResult }: { fetchMoreResult?: PostsData }
-      ) => {
-        if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
-          // 🚨 If no more posts, loop back to page 1
-          return {
-            posts: [...prev.posts, ...prev.posts.slice(0, 10)],
-          }
-        }
-        return {
-          posts: [...prev.posts, ...fetchMoreResult.posts],
-        }
-      },
-    })
-  }
+  // Subscription for new posts
+  const { data: subData } = useSubscription<{ newPost: Post }>(
+    NEW_POST_SUBSCRIPTION
+  )
+
+  useEffect(() => {
+    if (subData?.newPost) {
+      setPosts((prev) => [subData.newPost, ...prev]) // prepend new post
+    }
+  }, [subData])
 
   // Error State
   if (error) {
@@ -104,12 +97,30 @@ const FeedList: React.FC = () => {
     )
   }
 
+  // Infinite scroll handler
+  const fetchMorePosts = () => {
+    fetchMore({
+      variables: {
+        page: Math.floor(posts.length / 10) + 1,
+        limit: 10,
+      },
+      updateQuery: (prev: PostsData, { fetchMoreResult }: { fetchMoreResult?: PostsData }) => {
+        if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
+          return prev
+        }
+        return {
+          posts: [...prev.posts, ...fetchMoreResult.posts],
+        }
+      },
+    })
+  }
+
   return (
     <div className="w-full max-w-[600px] mx-auto -mt-7 bg-[#F6F6F6] px-4 sm:px-0">
       <InfiniteScroll
         dataLength={posts.length}
         next={fetchMorePosts}
-        hasMore={true} // ✅ always true → infinite
+        hasMore={true}
         loader={
           <div className="space-y-4 py-4">
             {[...Array(2)].map((_, i) => (
@@ -118,8 +129,8 @@ const FeedList: React.FC = () => {
           </div>
         }
       >
-        {posts.map((post: Post, index: number) => (
-          <PostCard key={`${post.id}-${index}`} {...post} />
+        {posts.map((post: Post) => (
+          <PostCard key={post.id} {...post} />
         ))}
       </InfiniteScroll>
     </div>

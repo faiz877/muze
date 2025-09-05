@@ -1,5 +1,14 @@
 import { ApolloServer } from "@apollo/server"
-import { startStandaloneServer } from "@apollo/server/standalone"
+import { makeExecutableSchema } from "@graphql-tools/schema"
+import { PubSub } from "graphql-subscriptions"
+import { PubSubAsyncIterableIterator } from "graphql-subscriptions/dist/pubsub-async-iterable-iterator"
+import { createServer } from "http"
+import { WebSocketServer } from "ws"
+import { useServer } from "graphql-ws/use/ws"
+import express from "express"
+import cors from "cors"
+import bodyParser from "body-parser"
+import { expressMiddleware } from "@apollo/server/express4"
 
 const typeDefs = `#graphql
   type Post {
@@ -30,8 +39,6 @@ const typeDefs = `#graphql
   }
 `
 
-// Mock data
-// Define interfaces for our types
 interface Post {
   id: string
   author: string
@@ -46,6 +53,13 @@ interface Post {
   isReply: boolean
   parentPostId: string | null
 }
+
+interface PubSubEvents {
+  [event: string]: any
+  NEW_POST: { newPost: Post }
+}
+
+const pubsub = new PubSub<PubSubEvents>()
 
 const posts: Post[] = Array.from({ length: 30 }, (_, i) => ({
   id: `${i + 1}`,
@@ -64,33 +78,77 @@ const posts: Post[] = Array.from({ length: 30 }, (_, i) => ({
 
 const resolvers = {
   Query: {
-    posts: (_parent: never, { page, limit }: { page: number; limit: number }) => {
+    posts: (_: any, { page, limit }: { page: number; limit: number }) => {
       const start = (page - 1) * limit
       return posts.slice(start, start + limit)
     },
   },
   Mutation: {
-    likePost: (_parent: never, { id }: { id: string }) => {
+    likePost: (_: any, { id }: { id: string }) => {
       const post = posts.find((p) => p.id === id)
-      if (!post) {
-        throw new Error(`Post with id ${id} not found`)
-      }
+      if (!post) throw new Error(`Post with id ${id} not found`)
       post.likes += 1
       return post
     },
   },
+  Subscription: {
+    newPost: {
+      subscribe: () => new PubSubAsyncIterableIterator(pubsub as any, "NEW_POST") as any,
+    },
+  },
 }
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-})
+const schema = makeExecutableSchema({ typeDefs, resolvers })
 
-const start = async () => {
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+async function start() {
+  const app = express()
+  const httpServer = createServer(app)
+
+  // WebSocket server for subscriptions
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: "/graphql",
   })
-  console.log(`🚀 Server ready at ${url}`)
+
+  useServer({ schema }, wsServer)
+
+  // Apollo server for queries/mutations
+  const server = new ApolloServer({ schema })
+  await server.start()
+
+  app.use(
+    "/graphql",
+    cors<cors.CorsRequest>(),
+    bodyParser.json(),
+    expressMiddleware(server) as any
+  )
+
+  const PORT = 4000
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Query/Mutation endpoint: http://localhost:${PORT}/graphql`)
+    console.log(`🚀 Subscription endpoint (WS): ws://localhost:${PORT}/graphql`)
+  })
+
+  // Simulate new posts every 15s
+  setInterval(() => {
+    const newPost: Post = {
+      id: String(Date.now()),
+      author: "System Bot",
+      username: "system",
+      content: "🚀 This is a new real-time post!",
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      views: 0,
+      timestamp: new Date().toISOString(),
+      imageUrl: null,
+      isReply: false,
+      parentPostId: null,
+    }
+    posts.unshift(newPost)
+    pubsub.publish("NEW_POST", { newPost })
+    console.log("📢 Published new post:", newPost.id)
+  }, 15000)
 }
 
 start()

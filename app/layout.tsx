@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
+import ApolloWrapper from "@/graphql/ApolloProvider";
 
 import '@fontsource/inter/400.css'; // Regular
 import '@fontsource/inter/500.css'; // Medium
@@ -27,16 +28,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-[#F6F6F6]">
-      <body
-        className="antialiased min-h-screen bg-[#F6F6F6]"
-      >
-        <div className="min-h-screen bg-[#F6F6F6]">
-          <Header />
-          <Navigation />
-          <main className="bg-[#F6F6F6]">
-            {children}
-          </main>
-        </div>
+      <body className="antialiased min-h-screen bg-[#F6F6F6]">
+        <ApolloWrapper> 
+          <div className="min-h-screen bg-[#F6F6F6]">
+            <Header />
+            <Navigation />
+            <main className="bg-[#F6F6F6]">
+              {children}
+            </main>
+          </div>
+        </ApolloWrapper>
       </body>
     </html>
   );

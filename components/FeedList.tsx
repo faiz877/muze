@@ -1,46 +1,44 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import PostCard from "./PostCard"
 import { AlertCircle, Inbox } from "lucide-react"
 import PostSkeleton from "./PostSkeleton"
+import { useQuery } from "@apollo/client/react"
+import { GET_POSTS } from "@/graphql/queries"
 
-const generatePosts = (count: number, offset: number) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${offset + i + 1}`,
-    author: "John Doe",
-    username: "johndoe",
-    timestamp: "1h",
-    content: `This is a mock post #${offset + i + 1}`,
-    likes: (offset + i + 1) * 17,
-    dislikes: (offset + i + 1) * 3,
-    comments: (offset + i + 1) * 5,
-    reposts: (offset + i + 1) * 2,
-    views: (offset + i + 1) * 100,
-  }))
+interface Post {
+  id: string
+  author: string
+  username: string
+  content: string
+  likes: number
+  comments: number
+  reposts: number
+  views: number
+  timestamp: string
+  imageUrl?: string
+  isReply?: boolean
+  dislikes?: number
+  boostedBy?: string
+}
+
+interface PostsData {
+  posts: Post[]
+}
+
+interface PostsVars {
+  page: number
+  limit: number
 }
 
 const FeedList: React.FC = () => {
-  const [posts, setPosts] = useState(() => generatePosts(10, 0))
-  const [hasMore, setHasMore] = useState(true)
-  const [error, setError] = useState(false) // simulate error state toggle
-
-  const fetchMorePosts = () => {
-    if (posts.length >= 50) {
-      setHasMore(false)
-      return
-    }
-    setTimeout(() => {
-      // simulate error every 25 posts (for testing)
-      if (posts.length === 25) {
-        setError(true)
-        return
-      }
-      const newPosts = generatePosts(10, posts.length)
-      setPosts((prev) => [...prev, ...newPosts])
-    }, 1200)
-  }
+  // Apollo query
+  const { data, loading, error, fetchMore } = useQuery<PostsData, PostsVars>(GET_POSTS, {
+    variables: { page: 1, limit: 10 },
+    notifyOnNetworkStatusChange: true,
+  })
 
   // Error State
   if (error) {
@@ -54,28 +52,60 @@ const FeedList: React.FC = () => {
   }
 
   // Empty State
-  if (posts.length === 0) {
+  if (!loading && data?.posts?.length === 0) {
     return (
       <div className="w-[600px] mx-auto mt-10 text-center text-gray-600">
         <Inbox className="mx-auto mb-2 text-gray-400" size={32} />
         <p className="text-sm font-medium">No posts yet</p>
-        <p className="text-xs text-gray-400">Start following people to see posts here.</p>
+        <p className="text-xs text-gray-400">
+          Start following people to see posts here.
+        </p>
       </div>
     )
+  }
+
+  // Loading State (initial load)
+  if (loading && !data) {
+    return (
+      <div className="space-y-4 py-4 w-full max-w-[600px] mx-auto">
+        {[...Array(3)].map((_, i) => (
+          <PostSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
+
+  // Infinite scroll handler
+  const fetchMorePosts = () => {
+    if (!data?.posts) return
+    fetchMore({
+      variables: {
+        page: Math.floor(data.posts.length / 10) + 1,
+        limit: 10,
+      },
+      updateQuery: (prev: PostsData, { fetchMoreResult }: { fetchMoreResult: PostsData | undefined }) => {
+        if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
+          return prev
+        }
+        return {
+          posts: [...prev.posts, ...fetchMoreResult.posts],
+        }
+      },
+    })
   }
 
   return (
     <div className="w-full max-w-[600px] mx-auto -mt-7 bg-[#F6F6F6] px-4 sm:px-0">
       <InfiniteScroll
-        dataLength={posts.length}
+        dataLength={data?.posts?.length || 0}
         next={fetchMorePosts}
-        hasMore={hasMore}
+        hasMore={true} // Apollo will stop when no more posts
         loader={
-            <div className="space-y-4 py-4">
-                {[...Array(3)].map((_, i) => (
-                <PostSkeleton key={i} />
-                ))}
-            </div>
+          <div className="space-y-4 py-4">
+            {[...Array(2)].map((_, i) => (
+              <PostSkeleton key={i} />
+            ))}
+          </div>
         }
         endMessage={
           <p className="text-center text-sm text-gray-400 py-4">
@@ -83,7 +113,7 @@ const FeedList: React.FC = () => {
           </p>
         }
       >
-        {posts.map((post) => (
+        {data?.posts?.map((post: Post) => (
           <PostCard key={post.id} {...post} />
         ))}
       </InfiniteScroll>

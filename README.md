@@ -4,6 +4,11 @@
 
 A real-time social media feed component built with Next.js App Router, React, TypeScript, TailwindCSS, Apollo Client, and Zustand. Features include post fetching, infinite scrolling, like functionality, real-time updates via GraphQL subscriptions, and a mock GraphQL backend.
 
+## Live Demo
+
+[https://muze-xi.vercel.app/](https://muze-xi.vercel.app/)
+
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)

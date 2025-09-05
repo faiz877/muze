@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { useFeedStore, type MainTab, type SubTab } from "@/store/feedStore";
+import { useFeedStore, type MainTab } from "@/store/feedStore";
 
 const Navigation = () => {
   const activeTab = useFeedStore((s) => s.activeTab)

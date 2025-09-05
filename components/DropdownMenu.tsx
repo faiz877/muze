@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useRef, useEffect } from "react"
+import React, { useRef, useEffect } from "react"
 import { useFeedStore } from "@/store/feedStore"
 
 interface DropdownMenuProps {
@@ -22,7 +22,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ options, postId = "global" 
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [open, setDropdownOpenPostId])
 
   return (
     <div className="relative" ref={menuRef}>

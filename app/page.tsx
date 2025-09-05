@@ -1,9 +1,7 @@
 import FeedList from '@/components/FeedList';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { makeExecutableSchema } from "@graphql-tools/schema";
-// Use require to avoid TS type resolution issues for this package in the app dir
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { addMocksToSchema } = require("@graphql-tools/mock");
+import { addMocksToSchema } from "@graphql-tools/mock";
 import { graphql } from "graphql";
 import { typeDefs as mockTypeDefs, resolvers as mockResolvers } from "@/graphql/mock/schema";
 
@@ -43,7 +41,7 @@ async function fetchInitialPosts() {
       variableValues: { page: 1, limit: 10 },
     })
     // In case of any error, gracefully fall back to empty list
-    return (result.data as any)?.posts ?? []
+    return (result.data as { posts?: unknown[] })?.posts ?? []
   }
 
   // Otherwise, fetch from the real HTTP endpoint
@@ -82,11 +80,27 @@ async function fetchInitialPosts() {
   return json.data?.posts ?? []
 }
 
+interface Post {
+  id: string
+  author: string
+  username: string
+  content: string
+  likes: number
+  comments: number
+  reposts: number
+  views: number
+  timestamp: string
+  imageUrl?: string | null
+  avatarUrl?: string | null
+  isReply?: boolean
+  parentPostId?: string | null
+}
+
 export default async function Home() {
   const initialPostsData = await fetchInitialPosts()
   
   // Ensure data is serializable by converting to plain objects
-  const initialPosts = initialPostsData.map(post => ({
+  const initialPosts = initialPostsData.map((post: Post) => ({
     ...post,
     // Ensure timestamp is a string
     timestamp: post.timestamp ? post.timestamp.toString() : new Date().toISOString(),

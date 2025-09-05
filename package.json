@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:server": "ts-node server/index.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.0.4",
+    "@apollo/server": "^5.0.0",
     "@fontsource/inter": "^5.2.6",
     "graphql": "^16.11.0",
     "graphql-ws": "^6.0.6",

@@ -5,8 +5,8 @@ import InfiniteScroll from "react-infinite-scroll-component"
 import PostCard from "./PostCard"
 import { AlertCircle, Inbox } from "lucide-react"
 import PostSkeleton from "./PostSkeleton"
-import { useQuery } from "@apollo/client/react"
 import { GET_POSTS } from "@/graphql/queries"
+import { useQuery } from "@apollo/client/react"
 
 interface Post {
   id: string
@@ -34,11 +34,13 @@ interface PostsVars {
 }
 
 const FeedList: React.FC = () => {
-  // Apollo query
-  const { data, loading, error, fetchMore } = useQuery<PostsData, PostsVars>(GET_POSTS, {
-    variables: { page: 1, limit: 10 },
-    notifyOnNetworkStatusChange: true,
-  })
+  const { data, loading, error, fetchMore } = useQuery<PostsData, PostsVars>(
+    GET_POSTS,
+    {
+      variables: { page: 1, limit: 10 },
+      notifyOnNetworkStatusChange: true,
+    }
+  )
 
   // Error State
   if (error) {
@@ -80,10 +82,13 @@ const FeedList: React.FC = () => {
     if (!data?.posts) return
     fetchMore({
       variables: {
-        page: Math.floor(data.posts.length / 10) + 1,
+        page: Math.floor(data.posts.length / 10) + 1, // next page
         limit: 10,
       },
-      updateQuery: (prev: PostsData, { fetchMoreResult }: { fetchMoreResult: PostsData | undefined }) => {
+      updateQuery: (
+        prev: PostsData,
+        { fetchMoreResult }: { fetchMoreResult?: PostsData }
+      ) => {
         if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
           return prev
         }

@@ -56,29 +56,35 @@ if (useMocks) {
   // Mock subscription link that emits every 15s
   const mockSubLink = new ApolloLink(() =>
     new Observable((observer) => {
-      const interval = setInterval(() => {
-        observer.next({
-          data: {
-            newPost: {
-              __typename: 'Post',
-              id: String(Date.now()),
-              author: 'Muze Daily',
-              username: 'muze',
-              content: 'Today we asked: what small habit improved your focus the most? Mine was batching notifications to twice a day. Share yours below.',
-              likes: Math.floor(Math.random() * 50),
-              comments: Math.floor(Math.random() * 10),
-              reposts: Math.floor(Math.random() * 5),
-              views: Math.floor(Math.random() * 1000),
-              timestamp: new Date().toISOString(),
-              imageUrl: null,
-              avatarUrl: '/profile2.jpg',
-              isReply: false,
-              parentPostId: null,
+      // Add a delay before the first post to prevent it from appearing immediately
+      const timeout = setTimeout(() => {
+        const interval = setInterval(() => {
+          observer.next({
+            data: {
+              newPost: {
+                __typename: 'Post',
+                id: String(Date.now()),
+                author: 'Muze Daily',
+                username: 'muze',
+                content: 'Today we asked: what small habit improved your focus the most? Mine was batching notifications to twice a day. Share yours below.',
+                likes: Math.floor(Math.random() * 50),
+                comments: Math.floor(Math.random() * 10),
+                reposts: Math.floor(Math.random() * 5),
+                views: Math.floor(Math.random() * 1000),
+                timestamp: new Date().toISOString(),
+                imageUrl: null,
+                avatarUrl: '/profile2.jpg',
+                isReply: false,
+                parentPostId: null,
+              },
             },
-          },
-        })
-      }, 15000)
-      return () => clearInterval(interval)
+          })
+        }, 15000)
+      }, 5000) // 5 second delay before first post
+      return () => {
+        clearTimeout(timeout)
+        clearInterval(interval)
+      }
     })
   )
 

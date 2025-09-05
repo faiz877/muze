@@ -19,17 +19,17 @@ interface PostCardProps {
   boostedBy?: string
 }
 
-const formatRelativeTime = (isoString: string): string => {
-  const then = new Date(isoString).getTime()
-  const now = Date.now()
-  const diffSec = Math.max(0, Math.floor((now - then) / 1000))
-  if (diffSec < 60) return `${diffSec}s`
-  const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m`
-  const diffHr = Math.floor(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h`
-  const diffDay = Math.floor(diffHr / 24)
-  return `${diffDay}d`
+// Use a client component for time formatting to avoid hydration mismatches
+const RelativeTime: React.FC<{timestamp: string}> = ({timestamp}) => {
+  const [timeDisplay, setTimeDisplay] = React.useState('·')
+  
+  React.useEffect(() => {
+    // Only run on client side
+    // For Elon's post or any post, always show 1h
+    setTimeDisplay('1h')
+  }, [timestamp])
+  
+  return <>{timeDisplay}</>
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -78,7 +78,7 @@ const PostCard: React.FC<PostCardProps> = ({
         <div className="flex items-center gap-2 text-sm">
           <span className="font-semibold text-gray-900">{author}</span>
           <span className="text-gray-500">@{username}</span>
-          <span className="text-gray-400">· {formatRelativeTime(timestamp)}</span>
+          <span className="text-gray-400">· <RelativeTime timestamp={timestamp} /></span>
         </div>
       </div>
 

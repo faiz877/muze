@@ -43,6 +43,7 @@ const FeedList: React.FC<{ initialPosts?: Post[] }> = ({ initialPosts = [] }) =>
   )
 
   const [posts, setPosts] = useState<Post[]>(initialPosts)
+  const [hasInitialLoad, setHasInitialLoad] = useState<boolean>(initialPosts.length > 0)
 
   // Helper: ensure unique posts by id (preserve order)
   const uniqueById = (items: Post[]): Post[] => {
@@ -61,19 +62,25 @@ const FeedList: React.FC<{ initialPosts?: Post[] }> = ({ initialPosts = [] }) =>
   useEffect(() => {
     if (data?.posts) {
       setPosts(uniqueById(data.posts))
+      setHasInitialLoad(true)
     }
   }, [data])
 
   // Subscription for new posts
   const { data: subData } = useSubscription<{ newPost: Post }>(
-    NEW_POST_SUBSCRIPTION
+    NEW_POST_SUBSCRIPTION,
+    {
+      // Skip subscription until initial data is loaded
+      skip: !hasInitialLoad
+    }
   )
 
   useEffect(() => {
+    if (!hasInitialLoad) return
     if (subData?.newPost) {
       setPosts((prev) => uniqueById([subData.newPost, ...prev])) // prepend new post, dedup
     }
-  }, [subData])
+  }, [subData, hasInitialLoad])
 
   // Error State
   if (error) {

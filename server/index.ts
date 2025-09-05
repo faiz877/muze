@@ -129,13 +129,13 @@ async function start() {
     console.log(`🚀 Subscription endpoint (WS): ws://localhost:${PORT}/graphql`)
   })
 
-  // Simulate new posts every 15s
-  setInterval(() => {
+  // Simulate new posts every 20s, start AFTER initial page load to avoid flashing
+  const publishMockPost = () => {
     const newPost: Post = {
       id: String(Date.now()),
-      author: "System Bot",
-      username: "system",
-      content: "🚀 This is a new real-time post!",
+      author: "Muze Daily",
+      username: "muze",
+      content: "Question of the day: what small habit improved your focus the most? Mine was batching notifications.",
       likes: 0,
       comments: 0,
       reposts: 0,
@@ -148,7 +148,13 @@ async function start() {
     posts.unshift(newPost)
     pubsub.publish("NEW_POST", { newPost })
     console.log("📢 Published new post:", newPost.id)
-  }, 15000)
+  }
+
+  // delay first publication so users see initial feed first
+  setTimeout(() => {
+    publishMockPost()
+    setInterval(publishMockPost, 20000)
+  }, 20000)
 }
 
 start()

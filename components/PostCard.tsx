@@ -3,6 +3,7 @@ import Image from "next/image"
 import FooterActions from "./FooterActions"
 
 interface PostCardProps {
+  id: string
   author: string
   username: string
   timestamp: string
@@ -18,6 +19,7 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({
+  id,
   author,
   username,
   timestamp,
@@ -82,6 +84,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
       {/* Footer / Actions */}
       <FooterActions
+        postId={id}
         likes={likes}
         dislikes={dislikes}
         comments={comments}

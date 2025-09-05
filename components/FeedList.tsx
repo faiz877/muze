@@ -42,6 +42,33 @@ const FeedList: React.FC = () => {
     }
   )
 
+  const posts = data?.posts || []
+
+  const fetchMorePosts = () => {
+    if (!posts) return
+
+    fetchMore({
+      variables: {
+        page: Math.floor(posts.length / 10) + 1,
+        limit: 10,
+      },
+      updateQuery: (
+        prev: PostsData,
+        { fetchMoreResult }: { fetchMoreResult?: PostsData }
+      ) => {
+        if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
+          // 🚨 If no more posts, loop back to page 1
+          return {
+            posts: [...prev.posts, ...prev.posts.slice(0, 10)],
+          }
+        }
+        return {
+          posts: [...prev.posts, ...fetchMoreResult.posts],
+        }
+      },
+    })
+  }
+
   // Error State
   if (error) {
     return (
@@ -54,7 +81,7 @@ const FeedList: React.FC = () => {
   }
 
   // Empty State
-  if (!loading && data?.posts?.length === 0) {
+  if (!loading && posts.length === 0) {
     return (
       <div className="w-[600px] mx-auto mt-10 text-center text-gray-600">
         <Inbox className="mx-auto mb-2 text-gray-400" size={32} />
@@ -77,34 +104,12 @@ const FeedList: React.FC = () => {
     )
   }
 
-  // Infinite scroll handler
-  const fetchMorePosts = () => {
-    if (!data?.posts) return
-    fetchMore({
-      variables: {
-        page: Math.floor(data.posts.length / 10) + 1, // next page
-        limit: 10,
-      },
-      updateQuery: (
-        prev: PostsData,
-        { fetchMoreResult }: { fetchMoreResult?: PostsData }
-      ) => {
-        if (!fetchMoreResult || fetchMoreResult.posts.length === 0) {
-          return prev
-        }
-        return {
-          posts: [...prev.posts, ...fetchMoreResult.posts],
-        }
-      },
-    })
-  }
-
   return (
     <div className="w-full max-w-[600px] mx-auto -mt-7 bg-[#F6F6F6] px-4 sm:px-0">
       <InfiniteScroll
-        dataLength={data?.posts?.length || 0}
+        dataLength={posts.length}
         next={fetchMorePosts}
-        hasMore={true} // Apollo will stop when no more posts
+        hasMore={true} // ✅ always true → infinite
         loader={
           <div className="space-y-4 py-4">
             {[...Array(2)].map((_, i) => (
@@ -112,14 +117,9 @@ const FeedList: React.FC = () => {
             ))}
           </div>
         }
-        endMessage={
-          <p className="text-center text-sm text-gray-400 py-4">
-            🎉 You’ve reached the end!
-          </p>
-        }
       >
-        {data?.posts?.map((post: Post) => (
-          <PostCard key={post.id} {...post} />
+        {posts.map((post: Post, index: number) => (
+          <PostCard key={`${post.id}-${index}`} {...post} />
         ))}
       </InfiniteScroll>
     </div>

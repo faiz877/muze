@@ -1,8 +1,12 @@
+"use client"
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useFeedStore } from "@/store/feedStore";
 
 const Header = () => {
+  const toggleNewPostModal = useFeedStore((s) => s.toggleNewPostModal)
+
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-[#F6F6F6]" role="banner">
       <div className="flex items-center flex-1">
@@ -34,6 +38,7 @@ const Header = () => {
         <button
           aria-label="Create new post"
           className="text-sm min-w-[120px] scale-90 px-4 py-1 text-white rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 hover:shadow-lg hover:shadow-orange-200/50 active:scale-95 transition-all duration-200"
+          onClick={toggleNewPostModal}
         >
           New Post
         </button>

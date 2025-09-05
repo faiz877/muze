@@ -10,6 +10,7 @@ import {
   Zap
 } from "lucide-react"
 import DropdownMenu from "./DropdownMenu"
+import { useFeedStore } from "@/store/feedStore"
 import { useMutation } from "@apollo/client/react"
 import { LIKE_POST } from "@/graphql/queries"
 
@@ -36,7 +37,9 @@ const FooterActions: React.FC<FooterActionsProps> = ({
   reposts,
   views,
 }) => {
-  const [liked, setLiked] = useState(false)
+  const likedPosts = useFeedStore((s) => s.likedPosts)
+  const toggleLikeLocal = useFeedStore((s) => s.toggleLike)
+  const liked = !!likedPosts[postId]
   const [disliked, setDisliked] = useState(false)
   const [thanked, setThanked] = useState(false)
   const [reposted, setReposted] = useState(false)
@@ -53,7 +56,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
   }
 
   const newLiked = !liked
-  setLiked(newLiked)
+  toggleLikeLocal(postId)
   setLikes((prev) => (newLiked ? prev + 1 : prev - 1))
 
   try {
@@ -142,6 +145,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
           <Eye size={14} /> {formatNumber(views)}
         </span>
         <DropdownMenu
+          postId={postId}
           options={[
             { label: "Share", onClick: () => alert("Share clicked") },
             { label: "Report", onClick: () => alert("Report clicked") },

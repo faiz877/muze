@@ -1,18 +1,23 @@
+"use client"
 import React, { useState, useRef, useEffect } from "react"
+import { useFeedStore } from "@/store/feedStore"
 
 interface DropdownMenuProps {
   options: { label: string; onClick: () => void }[]
+  postId?: string
 }
 
-const DropdownMenu: React.FC<DropdownMenuProps> = ({ options }) => {
-  const [open, setOpen] = useState(false)
+const DropdownMenu: React.FC<DropdownMenuProps> = ({ options, postId = "global" }) => {
+  const dropdownOpenPostId = useFeedStore((s) => s.dropdownOpenPostId)
+  const setDropdownOpenPostId = useFeedStore((s) => s.setDropdownOpenPostId)
+  const open = dropdownOpenPostId === postId
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false)
+        if (open) setDropdownOpenPostId(null)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
@@ -22,7 +27,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ options }) => {
   return (
     <div className="relative" ref={menuRef}>
       <button
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setDropdownOpenPostId(open ? null : postId)}
         className="hover:text-black"
       >
         ⋯
